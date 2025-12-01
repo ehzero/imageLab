@@ -1,0 +1,37 @@
+# 가상 환경
+venv/
+env/
+ENV/
+.venv
+
+# Python 캐시
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# 모델 가중치 (용량이 큼)
+saved_models/**/*.pth
+saved_models/**/*.pkl
+
+# 테스트 이미지
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.webp
+!README_images/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# 환경 변수
+.env
