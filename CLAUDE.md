@@ -121,7 +121,7 @@ python main.py --input image.jpg --upscale-only --scale 2
 ## Project Structure
 
 ```
-BGRemoveUpscale/
+imageLab/
 ├── model/
 │   └── u2net.py          # Complete U²-Net model architecture
 ├── saved_models/

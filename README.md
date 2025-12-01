@@ -16,8 +16,8 @@ U²-Net과 Real-ESRGAN을 사용한 이미지 배경 제거 및 업스케일링 
 ### 1. 저장소 클론
 
 ```bash
-git clone https://github.com/ehzero/BGRemoveUpscale.git
-cd BGRemoveUpscale
+git clone https://github.com/ehzero/imageLab.git
+cd imageLab
 ```
 
 ### 2. 가상 환경 설정 (권장)
@@ -114,7 +114,7 @@ python main.py --input image.jpg --upscale-only --scale 4
 ## 프로젝트 구조
 
 ```
-BGRemoveUpscale/
+imageLab/
 ├── model/
 │   └── u2net.py          # U²-Net 모델 아키텍처
 ├── saved_models/
