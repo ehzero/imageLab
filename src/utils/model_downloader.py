@@ -1,6 +1,25 @@
 import os
+import gdown
 import urllib.request
 from pathlib import Path
+
+
+def download_from_gdrive(file_id: str, dest_path: str) -> None:
+    """
+    Google Drive에서 파일을 다운로드합니다.
+
+    Parameters:
+    - file_id: Google Drive 파일 ID
+    - dest_path: 저장할 경로
+    """
+    os.makedirs(os.path.dirname(dest_path), exist_ok=True)
+
+    print(f"Google Drive에서 다운로드 중...")
+    print(f"저장 위치: {dest_path}")
+
+    url = f"https://drive.google.com/uc?id={file_id}"
+    gdown.download(url, dest_path, quiet=False)
+    print("다운로드 완료!")
 
 
 def download_file(url: str, dest_path: str) -> None:
@@ -35,8 +54,8 @@ def ensure_model_weights() -> None:
     u2net_path = weights_dir / "u2net" / "u2net.pth"
     if not u2net_path.exists():
         print("U2Net 모델 가중치를 찾을 수 없습니다. 다운로드를 시작합니다...")
-        download_file(
-            "https://drive.google.com/uc?export=download&id=1ao1ovG1Qtx4b7EoskHXmi2E9rp5CHLcZ",
+        download_from_gdrive(
+            "1ao1ovG1Qtx4b7EoskHXmi2E9rp5CHLcZ",  # Google Drive 파일 ID
             str(u2net_path)
         )
     else:
