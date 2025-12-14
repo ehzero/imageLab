@@ -12,16 +12,13 @@ __pycache__/
 .Python
 
 # 모델 가중치 (용량이 큼)
-saved_models/**/*.pth
-saved_models/**/*.pkl
+models/**/*.pth
+models/**/*.pkl
+weights/**/*.pth
+weights/**/*.pkl
 
-# 테스트 이미지
-*.jpg
-*.jpeg
-*.png
-*.gif
-*.webp
-!README_images/
+# 테스트 관련
+# test/
 
 # IDE
 .vscode/
