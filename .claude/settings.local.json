@@ -17,7 +17,8 @@
       "Bash(git push)",
       "Bash(git reset:*)",
       "Bash(git rm:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nRefactor: 자체 서버 배포 아키텍처로 전환 및 프로젝트 구조 개선\n\n- AWS Lambda/Docker 의존성 제거\n  - infrastructure/ 디렉토리 삭제 (CDK 설정)\n  - src/Dockerfile, src/requirements.txt 중복 제거\n  - mangum 제거, 표준 FastAPI로 전환\n\n- API 인터페이스 변경\n  - 입력: multipart 파일 업로드 → URL 파라미터\n  - 출력: 직접 파일 반환 → S3 업로드 후 URL 반환\n  - urllib.request로 URL 이미지 다운로드\n\n- 디렉토리 구조 정리\n  - /models/ → /weights/ (모델 가중치 파일)\n  - 레거시 파일 제거 (CLAUDE.md, README.md, 루트 Python 파일)\n  - 코드를 src/ 하위로 모듈화 (api, core, utils, models)\n\n- 의존성 정리\n  - requirements.txt 통합 (boto3, uvicorn, python-multipart 추가)\n  - 모든 경로 참조를 weights/로 업데이트\n  - .gitignore에 weights/**/*.pth 추가 (대용량 파일 제외)\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n)\")"
     ],
     "deny": [],
     "ask": []

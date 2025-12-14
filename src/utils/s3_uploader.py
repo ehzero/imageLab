@@ -4,16 +4,17 @@ from datetime import datetime
 from uuid import uuid4
 
 
-def upload_to_s3(file_path: str, bucket_name: str = None) -> str:
+def upload_to_s3(file_path: str, bucket_name: str = None, expiration: int = 3600) -> str:
     """
-    S3에 이미지를 업로드하고 URL을 반환합니다.
+    S3에 이미지를 업로드하고 presigned URL을 반환합니다.
 
     Parameters:
     - file_path: 업로드할 파일의 로컬 경로
     - bucket_name: S3 버킷 이름 (기본값: 환경변수 BUCKET_NAME)
+    - expiration: URL 유효 시간 (초 단위, 기본값: 3600초 = 1시간)
 
     Returns:
-    - S3 객체 URL
+    - S3 presigned URL (임시 접근 가능한 URL)
     """
     if bucket_name is None:
         bucket_name = os.environ.get('BUCKET_NAME')
@@ -27,9 +28,20 @@ def upload_to_s3(file_path: str, bucket_name: str = None) -> str:
     file_extension = os.path.splitext(file_path)[1]
     s3_key = f"processed/{timestamp}_{unique_id}{file_extension}"
 
-    s3_client.upload_file(file_path, bucket_name, s3_key)
+    # S3에 파일 업로드 (ContentType 설정)
+    content_type = 'image/png' if file_extension.lower() == '.png' else 'image/jpeg'
+    s3_client.upload_file(
+        file_path,
+        bucket_name,
+        s3_key,
+        ExtraArgs={'ContentType': content_type}
+    )
 
-    region = os.environ.get('AWS_REGION', 'ap-northeast-2')
-    s3_url = f"https://{bucket_name}.s3.{region}.amazonaws.com/{s3_key}"
+    # Presigned URL 생성 (임시 접근 가능한 URL)
+    presigned_url = s3_client.generate_presigned_url(
+        'get_object',
+        Params={'Bucket': bucket_name, 'Key': s3_key},
+        ExpiresIn=expiration
+    )
 
-    return s3_url
+    return presigned_url
