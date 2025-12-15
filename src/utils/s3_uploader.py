@@ -29,7 +29,14 @@ def upload_to_s3(file_path: str, bucket_name: str = None, expiration: int = 3600
     s3_key = f"processed/{timestamp}_{unique_id}{file_extension}"
 
     # S3에 파일 업로드 (ContentType 설정)
-    content_type = 'image/png' if file_extension.lower() == '.png' else 'image/jpeg'
+    content_type_map = {
+        '.png': 'image/png',
+        '.jpg': 'image/jpeg',
+        '.jpeg': 'image/jpeg',
+        '.webp': 'image/webp',
+    }
+    content_type = content_type_map.get(file_extension.lower(), 'image/jpeg')
+    
     s3_client.upload_file(
         file_path,
         bucket_name,

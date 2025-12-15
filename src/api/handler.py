@@ -5,6 +5,8 @@ from contextlib import asynccontextmanager
 import os
 import cv2
 import urllib.request
+import tempfile
+from urllib.parse import urlparse
 from dotenv import load_dotenv
 from src.core.background_remover import load_model as load_bg_model, remove_background_image
 from src.core.upscaler import load_model as load_upscale_model, upscale_image
@@ -70,13 +72,27 @@ async def api_process(
     bg_model = models.get('bg_model')
     upscale_model = models.get('upscale_model')
 
-    # URL에서 이미지 다운로드
-    temp_input = f"/tmp/input_{os.path.basename(image_url)}"
-    urllib.request.urlretrieve(image_url, temp_input)
-
-    temp_output = f"/tmp/output_{os.path.basename(image_url)}"
-
     try:
+        temp_input = None
+        temp_output = None
+        temp_upscaled = None
+
+        # URL의 path 기준으로 확장자만 안전하게 추출 (쿼리스트링 제외)
+        url_path = urlparse(image_url).path
+        input_ext = os.path.splitext(url_path)[1].lower()
+        if input_ext not in {'.png', '.jpg', '.jpeg', '.webp'}:
+            input_ext = '.png'
+
+        # URL에서 이미지 다운로드 (요청별 임시 파일)
+        with tempfile.NamedTemporaryFile(delete=False, suffix=input_ext) as f_in:
+            temp_input = f_in.name
+        urllib.request.urlretrieve(image_url, temp_input)
+
+        # 배경 제거(알파 포함) 결과는 PNG로 저장하는 것이 가장 안전함
+        output_ext = '.png' if option in {'bg_remove', 'both'} else input_ext
+        with tempfile.NamedTemporaryFile(delete=False, suffix=output_ext) as f_out:
+            temp_output = f_out.name
+
         if option == 'bg_remove':
             # 배경 제거만
             no_bg_image = remove_background_image(temp_input, bg_model)
@@ -101,7 +117,8 @@ async def api_process(
             upscaled_image = upscale_image(image, upscale_model, scale)
 
             # 2. 임시 저장
-            temp_upscaled = '/tmp/temp_upscaled.png'
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.png') as f_up:
+                temp_upscaled = f_up.name
             cv2.imwrite(temp_upscaled, upscaled_image)
 
             # 3. 배경 제거
@@ -110,6 +127,7 @@ async def api_process(
 
             # 4. 임시 파일 삭제
             os.remove(temp_upscaled)
+            temp_upscaled = None
 
         # S3에 업로드
         s3_url = upload_to_s3(temp_output)
@@ -122,8 +140,10 @@ async def api_process(
 
     except Exception as e:
         # 오류 발생 시 임시 파일 정리
-        if os.path.exists(temp_input):
-            os.remove(temp_input)
-        if os.path.exists(temp_output):
-            os.remove(temp_output)
+        for p in (locals().get('temp_input'), locals().get('temp_output'), locals().get('temp_upscaled')):
+            if p and os.path.exists(p):
+                try:
+                    os.remove(p)
+                except OSError:
+                    pass
         raise

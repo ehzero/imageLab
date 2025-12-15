@@ -18,7 +18,7 @@ weights/**/*.pth
 weights/**/*.pkl
 
 # 테스트 관련
-# test/
+test/
 
 # IDE
 .vscode/
